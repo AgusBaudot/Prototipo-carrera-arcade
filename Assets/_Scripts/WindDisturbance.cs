@@ -68,7 +68,6 @@ public class WindDisturbance : MonoBehaviour
     /// </summary>
     public float SampleWindVelocity(float normalizedSpeed)
     {
-        Debug.Log(normalizedSpeed);
         normalizedSpeed = Mathf.Clamp01(normalizedSpeed);
 
         float targetVel = 0f;

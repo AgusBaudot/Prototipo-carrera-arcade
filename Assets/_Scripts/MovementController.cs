@@ -29,18 +29,40 @@ public class MovementController : MonoBehaviour
     {
         Vector3 forward = Vector3.forward * (_speedBoost.GetMoveSpeed() * Time.fixedDeltaTime);
 
-        _playerLateral += _lateralInput.ReadSmoothed() * lateralSpeed * Time.fixedDeltaTime;
-        _playerLateral = Mathf.Clamp(_playerLateral, -lateralClamp, lateralClamp);
-
-        Vector3 lateral = Vector3.zero;
+        // Only read new input when grounded
         if (_jump.IsGrounded())
         {
-            float wind = _wind.SampleWindVelocity(Mathf.InverseLerp(_speedBoost.BaseSpeed,
-                _speedBoost.BaseSpeed + _speedBoost.MaxExtra, _speedBoost.GetMoveSpeed()));
-            lateral = transform.right * (_playerLateral + wind * Time.fixedDeltaTime);
+            _playerLateral += _lateralInput.ReadSmoothed() * lateralSpeed * Time.fixedDeltaTime;
+            _playerLateral = Mathf.Clamp(_playerLateral, -lateralClamp, lateralClamp);
+
+            float wind = _wind.SampleWindVelocity(Mathf.InverseLerp(
+                _speedBoost.BaseSpeed,
+                _speedBoost.BaseSpeed + _speedBoost.MaxExtra,
+                _speedBoost.GetMoveSpeed()
+            ));
+
+            // Apply wind only on ground
+            _rb.MovePosition(new Vector3(_playerLateral + wind * Time.fixedDeltaTime, _rb.position.y, _rb.position.z) + forward);
         }
-        
-        _rb.MovePosition(new Vector3(0f, _rb.position.y, _rb.position.z) + forward + lateral);
+        else
+        {
+            // When in air → keep current X, don’t snap back
+            _rb.MovePosition(new Vector3(_rb.position.x, _rb.position.y, _rb.position.z) + forward);
+        }
+        // Vector3 forward = Vector3.forward * (_speedBoost.GetMoveSpeed() * Time.fixedDeltaTime);
+        //
+        // _playerLateral += _lateralInput.ReadSmoothed() * lateralSpeed * Time.fixedDeltaTime;
+        // _playerLateral = Mathf.Clamp(_playerLateral, -lateralClamp, lateralClamp);
+        //
+        // Vector3 lateral = Vector3.zero;
+        // if (_jump.IsGrounded())
+        // {
+        //     float wind = _wind.SampleWindVelocity(Mathf.InverseLerp(_speedBoost.BaseSpeed,
+        //         _speedBoost.BaseSpeed + _speedBoost.MaxExtra, _speedBoost.GetMoveSpeed()));
+        //     lateral = transform.right * (_playerLateral + wind * Time.fixedDeltaTime);
+        // }
+        //
+        // _rb.MovePosition(_rb.position + forward + lateral);
     }
     
     public float GetIntentionalLateral() => Math.Abs(transform.position.x);

@@ -27,7 +27,7 @@ public class LaneGuard : MonoBehaviour
         {
             _disqualified = true;
             onDisqualified?.Invoke();
-            Debug.Log("Disqualified");
+            Destroy(gameObject);
         }
     }
     
